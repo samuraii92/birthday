@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: for-kai
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
+    headers:
+      # صلاحيات الميكروفون ومستشعر الحركة
+      - path: /*
+        name: Permissions-Policy
+        value: microphone=(self), camera=(self), accelerometer=(self), gyroscope=(self), magnetometer=(self)
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      # لا تخزين مؤقّت للصفحة — أي تعديل يظهر فورًا
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache, must-revalidate
+      # الصوت والصور يُخزَّنان لتشغيل أسرع
+      - path: /*.m4a
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*.mp3
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*.jpg
+        name: Cache-Control
+        value: public, max-age=604800
+      - path: /*.png
+        name: Cache-Control
+        value: public, max-age=604800
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
