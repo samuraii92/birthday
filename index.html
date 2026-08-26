@@ -1752,8 +1752,19 @@ function openGames(){
     h.querySelectorAll('.gcard').forEach(function(b){
       b.addEventListener('click',function(){ startGame(+b.dataset.g); });
     });
-    h.querySelector('#gEx').addEventListener('click',function(){ closeSheet(); afterSheet(); });
+    
+    /* التعديل هنا: الانتقال للرسالة عند إغلاق الألعاب */
+    h.querySelector('#gEx').addEventListener('click',function(){ 
+      closeSheet(); 
+      if(!atEnd) next(); else afterSheet(); 
+    });
   });
+  
+  /* التعديل هنا أيضاً: عند الإغلاق من علامة X في الأعلى */
+  $('#mX').onclick=function(){ 
+    closeSheet(); 
+    if(!atEnd) next(); else afterSheet(); 
+  };
 }
 function startGame(i){
   audio(); pop3();
@@ -1789,26 +1800,21 @@ function openLetter(advance){
       '<p class="ps">'+DATA.ps+'</p></div>'+
       '<div style="margin-top:16px"><button class="btn yes" id="lX">إغلاق</button></div>';
     const b=h.querySelector('#phBox');
-    /* ربط الرسالة بالصورة ذاتها */
     b.innerHTML='<img alt="" src="matcha.jpg" onerror="this.src=\'kai.jpg\'">';
+    
     typeIn(h.querySelector('#fNote'), DATA.note);
+    
     h.querySelector('#lX').addEventListener('click',function(){
       closeSheet();
-      if(typeof Tawk_API !== 'undefined'){
-         Tawk_API.showWidget();
-         Tawk_API.toggle();
-      }
-
+      startSecretChat(); /* تشغيل الدردشة هنا */
       if(advance) next(); else afterSheet();
     });
   });
+  
   $('#mX').onclick=function(){ 
-      closeSheet(); 
-      if(typeof Tawk_API !== 'undefined'){
-         Tawk_API.showWidget();
-         Tawk_API.toggle();
-      }
-      if(advance) next(); else afterSheet(); 
+    closeSheet(); 
+    startSecretChat(); /* تشغيل الدردشة هنا أيضاً عند الإغلاق من علامة X */
+    if(advance) next(); else afterSheet(); 
   };
 }
 
@@ -2175,7 +2181,7 @@ var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
 (function(){
 var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
 s1.async=true;
-s1.src='https://embed.tawk.to/6a8f30ffc3c46c3445873f9c/1k0vleplj';
+s1.src='https://embed.tawk.to/6a8f30ffc3c46c3445873f9c/default';
 s1.charset='UTF-8';
 s1.setAttribute('crossorigin','*');
 s0.parentNode.insertBefore(s1,s0);
