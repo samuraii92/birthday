@@ -2133,19 +2133,7 @@ document.addEventListener('pointerdown',ping,{passive:true});
 
 let rescueOn=false;
 function rescue(reason){
-  if(rescueOn) return; rescueOn=true;
-  if(window.console) console.warn('rescue:',reason);
-  try{ if(typing) clearTimeout(typing); }catch(e){}
-  bub.classList.remove('on');
-  acts.innerHTML=''; acts.classList.add('on');
-  const b=document.createElement('button');
-  b.className='btn gold'; b.textContent='تابعي ⏭';
-  b.addEventListener('click',function(){
-    rescueOn=false; ping(); clearActs();
-    try{ if(killScene){ killScene(); killScene=null; } }catch(e){}
-    next();
-  });
-  acts.appendChild(b);
+  return; /* تم إيقاف زر "تابعي" نهائياً */
 }
 setInterval(function(){
   if(!$('#stage').classList.contains('on')) return;
