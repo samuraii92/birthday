@@ -1806,14 +1806,12 @@ function openLetter(advance){
     
     h.querySelector('#lX').addEventListener('click',function(){
       closeSheet();
-      startSecretChat(); /* تشغيل الدردشة هنا */
       if(advance) next(); else afterSheet();
     });
   });
   
   $('#mX').onclick=function(){ 
     closeSheet(); 
-    startSecretChat(); /* تشغيل الدردشة هنا أيضاً عند الإغلاق من علامة X */
     if(advance) next(); else afterSheet(); 
   };
 }
@@ -1822,10 +1820,23 @@ function openLetter(advance){
 let atEnd=false;
 function endMenu(){
   choices([
+    {t:'COME HERE 💬', cls:'yes', fn:function(){ startSecretChat(); }},
     {t:'العجلة 🎡',  cls:'gold',  fn:openWheel},
-    {t:'الألعاب 🎮', cls:'yes',   fn:openGames},
+    {t:'الألعاب 🎮', cls:'ghost', fn:openGames},
     {t:'الرسالة 💌', cls:'ghost', fn:function(){ openLetter(false); }}
   ]);
+  
+  /* كود التنسيق لجعل زر COME HERE كبيراً جداً ويأخذ العرض بالكامل */
+  const btns = document.querySelectorAll('#acts .btn');
+  if(btns.length > 0) {
+     btns[0].style.width = '100%';
+     btns[0].style.fontSize = '24px';
+     btns[0].style.fontWeight = '800';
+     btns[0].style.padding = '16px';
+     btns[0].style.marginBottom = '12px';
+     btns[0].style.background = 'linear-gradient(160deg, #D96189, #9E4257)';
+     btns[0].style.boxShadow = '0 10px 30px rgba(158, 66, 87, 0.4)';
+  }
 }
 function afterSheet(){ if(atEnd) endMenu(); }
 SC[10]=function(){
@@ -2150,6 +2161,31 @@ window.addEventListener('error',function(ev){
 });
 window.addEventListener('unhandledrejection',function(){ ping(); });
 
+/*═══════════ الدردشة السرية ═══════════*/
+let chatStarted = false;
+function startSecretChat() {
+  if(chatStarted) {
+     if(typeof Tawk_API !== 'undefined') Tawk_API.maximize();
+     return;
+  }
+  chatStarted = true;
+  
+  var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+  var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+  s1.async=true;
+  s1.src='https://embed.tawk.to/6a8f30ffc3c46c3445873f9c/default'; 
+  s1.charset='UTF-8';
+  s1.setAttribute('crossorigin','*');
+  s0.parentNode.insertBefore(s1,s0);
+  
+  Tawk_API.onLoad = function(){
+      Tawk_API.maximize(); 
+  };
+}
+
+/*═══════════ إقلاع ═══════════*/
+sizeAll();
+addEventListener('touchmove',function(e){ if(e.touches.length>1) e.preventDefault(); },{passive:false});
 /*═══════════ إقلاع ═══════════*/
 sizeAll();
 addEventListener('touchmove',function(e){ if(e.touches.length>1) e.preventDefault(); },{passive:false});
@@ -2175,18 +2211,5 @@ if(BYPASS || Date.now()>=CFG.targetUTC){
 }
 })();
 </script>
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/6a8f30ffc3c46c3445873f9c/default';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->
 </body>
 </html>
