@@ -1193,7 +1193,10 @@ function openSheet(title,lead,build){
 function closeSheet(){
   $('#modal').classList.remove('on');
   if(gClean){ gClean(); gClean=null; }
-  $('#mX').onclick=closeSheet;
+  
+  if(atEnd) {
+     endMenu();
+  }
 }
 $('#mX').onclick=closeSheet;
 
