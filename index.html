@@ -2161,34 +2161,6 @@ window.addEventListener('error',function(ev){
 });
 window.addEventListener('unhandledrejection',function(){ ping(); });
 
-/*═══════════ الدردشة السرية ═══════════*/
-let chatStarted = false;
-function startSecretChat() {
-  if(chatStarted) {
-     if(typeof window.Tawk_API !== 'undefined' && window.Tawk_API.maximize) {
-         window.Tawk_API.maximize();
-     }
-     return;
-  }
-  chatStarted = true;
-  
-  window.Tawk_API = window.Tawk_API || {};
-  window.Tawk_LoadStart = new Date();
-  var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
-  s1.async = true;
-  /* لقد وضعت الرابط الصحيح الخاص بك هنا */
-  s1.src = 'https://embed.tawk.to/6a8f30ffc3c46c3445873f9c/1k0vleplj'; 
-  s1.charset = 'UTF-8';
-  s1.setAttribute('crossorigin', '*');
-  s0.parentNode.insertBefore(s1, s0);
-  
-  window.Tawk_API.onLoad = function(){
-      window.Tawk_API.maximize(); 
-  };
-}
-/*═══════════ إقلاع ═══════════*/
-sizeAll();
-addEventListener('touchmove',function(e){ if(e.touches.length>1) e.preventDefault(); },{passive:false});
 /*═══════════ إقلاع ═══════════*/
 sizeAll();
 addEventListener('touchmove',function(e){ if(e.touches.length>1) e.preventDefault(); },{passive:false});
