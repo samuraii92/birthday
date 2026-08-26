@@ -347,6 +347,7 @@ body.wide #bars i{height:0}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
+<script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
 
@@ -2160,7 +2161,41 @@ window.addEventListener('error',function(ev){
   },900);
 });
 window.addEventListener('unhandledrejection',function(){ ping(); });
+/*═══════════ الدردشة الحية عبر السيرفر الخاص ═══════════*/
+let socket;
+function startSecretChat() {
+  clearActs(); // إخفاء الأزرار
+  
+  // إنشاء مربع كتابة أنيق لها أسفل الشاشة
+  const chatUI = document.createElement('div');
+  chatUI.id = 'chat-ui';
+  chatUI.style.cssText = 'position:fixed; bottom:calc(3vh + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:100; width:min(90%, 500px); display:flex; gap:10px; animation: sIn 0.5s ease;';
+  chatUI.innerHTML = '<input type="text" id="chat-msg" style="flex:1; padding:14px 20px; border-radius:999px; border:1px solid rgba(255,255,255,0.2); background:rgba(8,5,15,0.8); color:#fff; font-family:Tajawal, sans-serif; font-size:16px; outline:none; text-align:right; backdrop-filter:blur(10px);" placeholder="تحدثي مع جوجي..."><button id="chat-send" class="btn yes" style="padding:10px 24px; min-height:46px; border-radius:999px; font-size:16px;">إرسال</button>';
+  document.body.appendChild(chatUI);
 
+  // الاتصال بالسيرفر
+  socket = io();
+
+  const sendBtn = document.getElementById('chat-send');
+  const msgInput = document.getElementById('chat-msg');
+
+  // عندما ترسل هي رسالة
+  function sendMessage() {
+      const text = msgInput.value.trim();
+      if(text) {
+          socket.emit('chatMessage', { sender: DATA.name, text: text });
+          msgInput.value = '';
+      }
+  }
+  sendBtn.onclick = sendMessage;
+  msgInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+  // استقبال الرسائل وجعل الشخصيات تتحدث!
+  socket.on('chatMessage', (msg) => {
+      // إظهار فقاعة الكلام فوق شخصية كوكي أو جوجي
+      say(msg.sender, msg.text);
+  });
+}
 /*═══════════ إقلاع ═══════════*/
 sizeAll();
 addEventListener('touchmove',function(e){ if(e.touches.length>1) e.preventDefault(); },{passive:false});
