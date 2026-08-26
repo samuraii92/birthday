@@ -2177,7 +2177,6 @@ function startSecretChat() {
   const sendBtn = document.getElementById('chat-send');
   const msgInput = document.getElementById('chat-msg');
 
-  // عندما ترسل هي رسالة
   function sendMessage() {
       const text = msgInput.value.trim();
       if(text) {
@@ -2185,12 +2184,14 @@ function startSecretChat() {
           msgInput.value = '';
       }
   }
-  sendBtn.onclick = sendMessage;
-  msgInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+  
+  // ربط الحدث بـ addEventListener لضمان استجابته للضغط
+  sendBtn.addEventListener('click', sendMessage);
+  msgInput.addEventListener('keypress', (e) => { 
+      if(e.key === 'Enter') sendMessage(); 
+  });
 
-  // استقبال الرسائل وجعل الشخصيات تتحدث!
   socket.on('chatMessage', (msg) => {
-      // إظهار فقاعة الكلام فوق شخصية كوكي أو جوجي
       say(msg.sender, msg.text);
   });
 }
