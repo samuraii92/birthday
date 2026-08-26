@@ -7,14 +7,23 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// عرض كل الملفات (HTML, صور، صوت) الموجودة في نفس المجلد
-app.use(express.static(path.join(__dirname, '/')));
+// إخبار السيرفر بتقديم كل ملفات المشروع (HTML, CSS, JS, الصور، الصوت)
+app.use(express.static(__dirname));
 
-// إدارة الدردشة الحية
+// صفحة الموقع الأساسية
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// صفحة الآدمن المخفية
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// إدارة المحادثة الفورية
 io.on('connection', (socket) => {
-  console.log('مستخدم جديد متصل');
+  console.log('مستخدم متصل بالدردشة');
   
-  // استقبال الرسالة من أي طرف وإعادة إرسالها للطرفين في نفس اللحظة
   socket.on('chatMessage', (msg) => {
     io.emit('chatMessage', msg);
   });
@@ -26,5 +35,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`الخادم يعمل بنجاح على البورت ${PORT}`);
+  console.log(`السيرفر يعمل الآن على البورت ${PORT}`);
 });
