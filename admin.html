@@ -25,10 +25,27 @@
     <button id="chat-send">إرسال</button>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
     const msgsDiv = document.getElementById('msgs');
+
+    // دالة لتوليد صوت تنبيه فوري في المتصفح عند وصول رسالة
+    function playNotificationSound() {
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // نغمة أولية
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // تصاعد لطيف
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } catch(e) {}
+    }
 
     socket.on('chatMessage', (msg) => {
         const div = document.createElement('div');
@@ -36,6 +53,11 @@
         div.innerHTML = `<strong>${msg.sender}:</strong><br>${msg.text}`;
         msgsDiv.appendChild(div);
         msgsDiv.scrollTop = msgsDiv.scrollHeight;
+
+        // إذا كانت الرسالة واردة من كوكي وليست منك أنت (جوجي)، شغل صوت التنبيه
+        if(msg.sender !== 'جوجي') {
+            playNotificationSound();
+        }
     });
 
     function sendMessage() {
@@ -47,7 +69,6 @@
         }
     }
     
-    // ربط الحدث بالزر وبضغط مفتاح Enter
     document.getElementById('chat-send').addEventListener('click', sendMessage);
     document.getElementById('chat-msg').addEventListener('keypress', (e) => { 
         if(e.key === 'Enter') sendMessage(); 
