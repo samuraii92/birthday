@@ -25,6 +25,7 @@
     <button id="chat-send">إرسال</button>
   </div>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
     const msgsDiv = document.getElementById('msgs');
@@ -38,14 +39,19 @@
     });
 
     function sendMessage() {
-        const text = document.getElementById('chat-msg').value.trim();
+        const input = document.getElementById('chat-msg');
+        const text = input.value.trim();
         if(text) {
             socket.emit('chatMessage', { sender: 'جوجي', text: text });
-            document.getElementById('chat-msg').value = '';
+            input.value = '';
         }
     }
-    document.getElementById('chat-send').onclick = sendMessage;
-    document.getElementById('chat-msg').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+    
+    // ربط الحدث بالزر وبضغط مفتاح Enter
+    document.getElementById('chat-send').addEventListener('click', sendMessage);
+    document.getElementById('chat-msg').addEventListener('keypress', (e) => { 
+        if(e.key === 'Enter') sendMessage(); 
+    });
   </script>
 </body>
 </html>
