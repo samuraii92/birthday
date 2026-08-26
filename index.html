@@ -1545,35 +1545,24 @@ SC[6]=function(){
   ], function(){ killScene=null; next(); });
 };
 
-/*══════════════════════════════════════════
-  الثامن · الأغنية
-══════════════════════════════════════════*/
+/*═══════════ الثامن · الأغنية ═══════════*/
 let aud=null, clipT=null, fadeT=null, audReady=false, audFail=false, audUnlocked=false;
-let srcIdx=0, songRaf=null;
-const AUDIO_SRC=['edit.m4a','reflection edit.m4a','reflection-edit.m4a','reflection.m4a','song.mp3','song.m4a'];
+let songRaf=null;
 
-function initAudio(src,chain){
+function initAudio(){
   if(aud){ try{ aud.pause(); }catch(e){} aud.onended=null; }
   audReady=false; audFail=false; audUnlocked=false;
-  aud=new Audio(src);
+  
+  /* نطلب الملف بالاسم الصحيح مباشرة بدلاً من قائمة الأسماء */
+  aud=new Audio('edit.m4a');
   aud.preload='auto'; aud.volume=0; aud.playsInline=true;
   aud.setAttribute('playsinline','');
-  aud.addEventListener('loadedmetadata',function(){
-    audReady=true; audFail=false;
-    if(isFinite(aud.duration)&&aud.duration>1) DATA.songLen=aud.duration;
-  });
+  aud.addEventListener('loadedmetadata',function(){ audReady=true; audFail=false; });
   aud.addEventListener('canplaythrough',function(){ audReady=true; audFail=false; });
-  aud.addEventListener('error',function(){
-    if(chain) tryNextSrc();
-    else { audFail=true; audReady=false; }
-  });
+  aud.addEventListener('error',function(){ audFail=true; audReady=false; });
   try{ aud.load(); }catch(e){}
 }
-function tryNextSrc(){
-  if(srcIdx>=AUDIO_SRC.length){ audFail=true; audReady=false; return; }
-  const src=AUDIO_SRC[srcIdx++];
-  initAudio(src,true);
-}
+
 function unlockAudio(){
   if(!aud||audUnlocked) return;
   try{
@@ -1586,7 +1575,7 @@ function unlockAudio(){
     else { try{ aud.pause(); }catch(e){} audUnlocked=true; }
   }catch(e){}
 }
-/* إجبار الأغنية لتبدأ من البداية بدون انتظار */
+
 function clipStart(){ return 0; }
 function stopClip(){
   if(clipT){ clearTimeout(clipT); clipT=null; }
@@ -1603,6 +1592,7 @@ function stopClip(){
     },60);
   }
 }
+
 function eyesShut(on){
   const el=$('#eyes'); if(el) el.classList.toggle('on',!!on);
   if(on){ SG.face='blink'; SB.face='blink'; }
@@ -1613,7 +1603,10 @@ let songDone=false;
 SC[7]=function(){
   chapter('الثامن · أغنية بالخارج');
   songDone=false;
-  if(!aud){ srcIdx=0; tryNextSrc(); }
+  
+  /* نحمل الأغنية في بداية المشهد لضمان جاهزيتها مبكراً */
+  if(!aud || audFail) initAudio(); 
+  
   if(killScene) killScene();
   killScene = run([
     S.line(DATA.boy,'عندي شيء أسمعك إياه. أعطيني أذنك اليمنى — وأنا آخذ اليسرى.'),
@@ -1667,18 +1660,21 @@ function afterSong(){
     say(DATA.boy,'انظري فوقك. ثم انظري من يجلس بجانبك. لهذا.',endSong);
   });
 }
+
 function playClip(){
   clearActs();
-  if(!aud){ srcIdx=0; tryNextSrc(); }
+  
+  /* الإصلاح الأساسي: إجبار الكود على إعادة المحاولة إذا فشل مسبقاً */
+  if(!aud || audFail){ initAudio(); }
+  
   const go=function(){
-    try{ aud.currentTime=0; }catch(e){} // البداية الفورية
-    aud.volume=1; // أعلى صوت فوراً دون تدرج
+    try{ aud.currentTime=0; }catch(e){} 
+    aud.volume=1; 
     let pr;
     try{ pr=aud.play(); }catch(e){ pr=null; }
     const ok=function(){
       eyesShut(true);
       
-      /* إظهار صورة البولارويد و تفاصيل الأغنية */
       $('#song-widget').style.display='flex';
       $('#polaroid-overlay').style.display='flex';
       setTimeout(() => {
@@ -1708,19 +1704,21 @@ function playClip(){
     });
     else ok();
   };
+  
   if(audReady){ go(); return; }
+  
   let tries=0;
   const iv=setInterval(function(){
     tries++;
     if(audReady){ clearInterval(iv); go(); }
-    else if(audFail||tries>32){
+    else if(audFail && tries > 8){ 
       clearInterval(iv);
       eyesShut(false); buds=false; SG.armL=0; SB.armR=0;
-      say(DATA.boy, 'لم أجد ملف الأغنية بجانب الصفحة. اسمعيها من Spotify.', function(){
-         choices([{t:'تابعي', cls:'ghost', fn:endSong}]);
+      say(DATA.boy, 'لم أستطع تحميل الأغنية. ربما بسبب ضعف الإنترنت.', function(){
+         choices([{t:'تابعي بدون أغنية', cls:'ghost', fn:endSong}]);
       });
     }
-  },250);
+  }, 400); 
 }
 
 /*═══ الألعاب ═══*/
@@ -2120,7 +2118,7 @@ $('#skip').addEventListener('click',function(){
   else{ clearActs(); next(); }
 });
 
-/*═══════════ شبكة الأمان — لا يتوقف المشهد أبداً ═══════════*/
+/*═══════════ شبكة الأمان — تقدم القصة تلقائياً بدون زر ═══════════*/
 let lastAct=Date.now();
 function ping(){ lastAct=Date.now(); }
 (function(){
@@ -2133,8 +2131,20 @@ document.addEventListener('pointerdown',ping,{passive:true});
 
 let rescueOn=false;
 function rescue(reason){
-  return; /* تم إيقاف زر "تابعي" نهائياً */
+  if(rescueOn) return; rescueOn=true;
+  try{ if(typing) clearTimeout(typing); }catch(e){}
+  bub.classList.remove('on');
+  clearActs();
+  
+  /* التعديل هنا: الانتقال التلقائي للخطوة التالية بصمت ودون إظهار زر "تابعي" */
+  setTimeout(function(){
+    rescueOn=false;
+    ping();
+    try{ if(killScene){ killScene(); killScene=null; } }catch(e){}
+    next();
+  }, 400);
 }
+
 setInterval(function(){
   if(!$('#stage').classList.contains('on')) return;
   if($('#modal').classList.contains('on')) { ping(); return; }
@@ -2198,7 +2208,7 @@ if(BYPASS || Date.now()>=CFG.targetUTC){
   st.innerHTML='<span>أطفئي الضوء وارفعي الصوت…<br>ثم المسي الشاشة</span>';
   document.body.appendChild(st);
   st.addEventListener('click',function(){
-    audio(); if(!aud){ srcIdx=0; tryNextSrc(); } unlockAudio();
+    audio(); if(!aud || audFail){ initAudio(); } unlockAudio();
     st.style.transition='opacity 1s'; st.style.opacity='0';
     setTimeout(function(){ st.remove(); },1000);
     goScene(0);
