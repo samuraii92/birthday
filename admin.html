@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>غرفة تحكم جوجي</title>
+<style>
+  body { background:#0A0713; color:#FFF8F2; font-family: sans-serif; padding:20px; display:flex; flex-direction:column; height:90vh; }
+  h2 { color: #D96189; text-align: center; }
+  #msgs { flex:1; overflow-y:auto; background:#161028; border-radius:14px; padding:15px; margin-bottom:15px; display:flex; flex-direction:column; gap:10px; }
+  .msg { padding: 12px 16px; border-radius:14px; max-width: 80%; line-height: 1.5; }
+  .kuki { background: #D96189; color: #fff; align-self: flex-start; border-bottom-right-radius: 4px; }
+  .joji { background: #4A90E2; color: #fff; align-self: flex-end; border-bottom-left-radius: 4px; }
+  .controls { display:flex; gap:10px; }
+  input { flex:1; padding: 14px; border-radius:10px; border:none; outline:none; font-size:16px; text-align:right;}
+  button { padding: 14px 24px; background:#D96189; color:#fff; border:none; border-radius:10px; font-weight:bold; font-size:16px; cursor:pointer; }
+</style>
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h2>محادثة الفضاء 🌌</h2>
+  <div id="msgs"></div>
+  <div class="controls">
+    <input type="text" id="chat-msg" placeholder="اكتب رسالتك لـ كوكي هنا...">
+    <button id="chat-send">إرسال</button>
+  </div>
+
+  <script>
+    const socket = io();
+    const msgsDiv = document.getElementById('msgs');
+
+    socket.on('chatMessage', (msg) => {
+        const div = document.createElement('div');
+        div.className = 'msg ' + (msg.sender === 'كوكي' ? 'kuki' : 'joji');
+        div.innerHTML = `<strong>${msg.sender}:</strong><br>${msg.text}`;
+        msgsDiv.appendChild(div);
+        msgsDiv.scrollTop = msgsDiv.scrollHeight;
+    });
+
+    function sendMessage() {
+        const text = document.getElementById('chat-msg').value.trim();
+        if(text) {
+            socket.emit('chatMessage', { sender: 'جوجي', text: text });
+            document.getElementById('chat-msg').value = '';
+        }
+    }
+    document.getElementById('chat-send').onclick = sendMessage;
+    document.getElementById('chat-msg').onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+  </script>
+</body>
+</html>
